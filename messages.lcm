@@ -1,0 +1,5 @@
+package messages;
+
+// Example LCM Message
+struct gameover_t {}
+
