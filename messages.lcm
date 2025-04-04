@@ -1,7 +1,9 @@
 package messages;
 
 // Game over message to signal end of game
-struct gameover_t {}
+struct gameover_t {
+    int8_t done;        // 1: done, 0: not done
+}
 
 // Updates the position of the It and NotIt nodes
 struct position_t {
@@ -19,8 +21,7 @@ struct freeze_t {
 // Synchronisation request message
 struct sync_request_t {
     int8_t node_type;
-    // 0: GameNode; 1: ItNode; 2: NotItNode
-    int32_t node_id;
+    int32_t node_id;    // 0: GameNode; 1: ItNode; 2: NotItNode
 }
 
 // Synchronisation confirmation reply message 

@@ -12,6 +12,12 @@ To solve this challenge, I took the following approach:
 ### 1. Completing the messages.lcm
 * From analysing the requirements of the game, I wanted to first expand the messages.lcm file with additional message types for the game's communication
 * Essentially, this establishes the communication protocols before we begin deving game.py 
+* After finishing the messages.lcm file, I ran:
+```
+lcm-gen -p messages.lcm
+```
+
+Which created a messaged directory, containing all the messages we have designed so far.
 
 ### 2. Structuring version-1 of `game.py`
 * After defining all the message types, it made sense to structure out what I would like each node to take in and how those processes would look like
