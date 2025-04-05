@@ -20,8 +20,8 @@ struct freeze_t {
 
 // Synchronisation request message
 struct sync_request_t {
-    int8_t node_type;
-    int32_t node_id;    // 0: GameNode; 1: ItNode; 2: NotItNode
+    int8_t node_type;   // 0: GameNode; 1: ItNode; 2: NotItNode
+    int32_t node_id;    
 }
 
 // Synchronisation confirmation reply message 
