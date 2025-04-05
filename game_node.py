@@ -95,42 +95,6 @@ class GameNode(Node):
 
         print("GameNode: Stopped.")
 
-    # def handle_position(self, channel, data):
-    #     '''
-    #     Handle incoming position updates from agents
-
-    #     Args:
-    #         channel (str): LCM channel
-    #         data (bytes): LCM message data
-    #     '''
-    #     msg = position_t.decode(data)
-    #     prev_pose = self.agents.get(msg.node_id)
-    #     self.agents[msg.node_id] = msg
-
-    #     # Check if this is a new position for a NotIt agent
-    #     if prev_pose is None and msg.is_it == 0:
-    #         print(f"GameNode: NotIt agent {msg.node_id} connected at {msg.x}, {msg.y}")
-
-    #     if prev_pose is None and msg.is_it == 1:
-    #         print(f"GameNode: It agent connected at {msg.x}, {msg.y}")
-
-    #     # Check for collision between It and NotIt agents
-    #     if msg.is_it == 1:
-    #         # It agent moved, check for collisions with NotIt agents
-    #         for node_id, agent in self.agents.items():
-    #             if (agent.is_it == 0 and node_id not in self.frozen_agents and
-    #                 agent.x == msg.x and agent.y == msg.y):
-
-    #                 # Freeze the NotIt agent
-    #                 freeze_msg = freeze_t()
-    #                 freeze_msg.node_id = node_id
-    #                 self.publish("FREEZE", freeze_msg)
-                    
-    #                 # Mark this agent as frozen
-    #                 self.frozen_agents.add(node_id)
-    #                 self.frozen_count += 1
-    #                 print(f"GameNode: It agent caught NotIt agent {node_id} at ({msg.x}, {msg.y})! ({self.frozen_count}/{self.num_not_it})")
-
     def handle_position(self, channel, data):
         '''
         Handle incoming position updates from agents
