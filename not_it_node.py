@@ -95,8 +95,8 @@ class NotItNode(Node):
 
         # Possible moves: up, down, left, right (no diagonal moves)
         moves = [
-                    (0, 1),  #UP
-                    (0, -1), #DOWN 
+                    (0, 1),  #DOWN
+                    (0, -1), #UP 
                     (1, 0),  #LEFT
                     (-1, 0)  #RIGHT
                 ]
@@ -134,10 +134,10 @@ class NotItNode(Node):
         Handle synchronization confirmation from the GameNode
         '''
         msg = sync_confirm_t.decode(data)
-        if msg.ready == 1 and msg.node_id == self.node_id:
+        if msg.ready == 1:
             self.game_active = True
             print(f"NotItNode {self.node_id}: Received synchronization confirmation")
-        
+
     def handle_freeze(self, channel, data):
         '''
         Handle freeze message from the GameNode
@@ -147,9 +147,11 @@ class NotItNode(Node):
             data (bytes): LCM message data
         '''
         msg = freeze_t.decode(data)
-        if msg.node_id == self.node_id:
+        if msg.node_id == self.node_id and not self.frozen:
             self.frozen = True
             print(f"NotItNode {self.node_id}: I've been frozen!")
+            # Immediately publish updated position to confirm frozen state
+            self.publish_position()
 
     def handle_game_over(self, channel, data):
         '''

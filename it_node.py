@@ -79,22 +79,91 @@ class ItNode(Node):
         # self.running = False
         print("ItNode: Stopped")
 
+    # def chase_closest_not_it(self):
+    #     '''
+    #     Chase the closest unfrozen NotIt agent
+    #     '''
+    #     closest_node_id = None
+    #     closest_distance = float('inf')
+
+    #     # Find the closest unfrozen NotIt node
+    #     for node_id, (x, y) in self.not_it_nodes.items():
+    #         if node_id not in self.frozen_nodes:
+    #             # Calculate Manhattan distance
+    #             distance = abs(self.x - x) + abs(self.y - y)
+    #             if distance < closest_distance:
+    #                 closest_distance = distance
+    #                 closest_node_id = node_id
+
+    #     # If no unfrozen nodes or all nodes are frozen, do nothing
+    #     if closest_node_id is None:
+    #         return
+        
+    #     # Get position of closest NotIt
+    #     target_x, target_y = self.not_it_nodes[closest_node_id]
+        
+    #     # Determine best move direction (prioritize larger axis difference)
+    #     dx = target_x - self.x
+    #     dy = target_y - self.y
+        
+    #     if abs(dx) >= abs(dy):
+    #         # Move horizontally first
+    #         if dx > 0:
+    #             self.x = min(self.x + 1, self.width - 1)
+    #         elif dx < 0:
+    #             self.x = max(self.x - 1, 0)
+    #     else:
+    #         # Move vertically first
+    #         if dy > 0:
+    #             self.y = min(self.y + 1, self.height - 1)
+    #         elif dy < 0:
+    #             self.y = max(self.y - 1, 0)
+                
+    #     print(f"ItNode: Moved to ({self.x}, {self.y}), chasing NotIt node {closest_node_id}")
+
     def chase_closest_not_it(self):
         '''
-        Chase the closest unfrozen NotIt agent
+        Chase the closest unfrozen NotIt agent with prediction
         '''
         closest_node_id = None
         closest_distance = float('inf')
-
-        # Find the closest unfrozen NotIt node
+        
+        # Find the closest unfrozen NotIt node with basic prediction
         for node_id, (x, y) in self.not_it_nodes.items():
             if node_id not in self.frozen_nodes:
-                # Calculate Manhattan distance
-                distance = abs(self.x - x) + abs(self.y - y)
-                if distance < closest_distance:
-                    closest_distance = distance
+                # Calculate current Manhattan distance
+                current_distance = abs(self.x - x) + abs(self.y - y)
+                
+                # Simple prediction: If we're more than 2 steps away, try to predict movement
+                if current_distance > 2:
+                    # Create a simple prediction of where the node might move
+                    # This assumes NotIt nodes move randomly, so we try to intercept rather than chase
+                    # Calculate the general direction we need to move
+                    dx_to_target = x - self.x
+                    dy_to_target = y - self.y
+                    
+                    # Adjust our target point to be slightly ahead of where they actually are
+                    # This helps intercept rather than chase
+                    intercept_x = x + (1 if dx_to_target > 0 else -1 if dx_to_target < 0 else 0)
+                    intercept_y = y + (1 if dy_to_target > 0 else -1 if dy_to_target < 0 else 0)
+                    
+                    # Make sure our intercept point is within bounds
+                    intercept_x = max(0, min(self.width - 1, intercept_x))
+                    intercept_y = max(0, min(self.height - 1, intercept_y))
+                    
+                    # Calculate distance to the intercept point
+                    intercept_distance = abs(self.x - intercept_x) + abs(self.y - intercept_y)
+                    
+                    # Use this for comparison
+                    effective_distance = intercept_distance
+                else:
+                    # When we're close, just go directly to the current position
+                    effective_distance = current_distance
+                
+                if effective_distance < closest_distance:
+                    closest_distance = effective_distance
                     closest_node_id = node_id
-
+        
         # If no unfrozen nodes or all nodes are frozen, do nothing
         if closest_node_id is None:
             return
@@ -142,7 +211,7 @@ class ItNode(Node):
             data (bytes): LCM message data
         '''
         msg = sync_confirm_t.decode(data)
-        if msg.ready == 1 and msg.node_id == self.node_id:
+        if msg.ready == 1:
             self.game_active = True
             print("ItNode: Received sync confirmation, game is active")
 
@@ -164,6 +233,9 @@ class ItNode(Node):
             if self.x == msg.x and self.y == msg.y:
                 print(f"ItNode: Caught NotIt node {msg.node_id} at ({msg.x}, {msg.y})!")
                 self.frozen_nodes.add(msg.node_id)
+            
+            # Position update to ensure GameNode sees this collision
+            self.publish_position()
 
     def handle_game_over(self, channel, data):
         '''

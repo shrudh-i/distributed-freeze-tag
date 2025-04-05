@@ -95,6 +95,42 @@ class GameNode(Node):
 
         print("GameNode: Stopped.")
 
+    # def handle_position(self, channel, data):
+    #     '''
+    #     Handle incoming position updates from agents
+
+    #     Args:
+    #         channel (str): LCM channel
+    #         data (bytes): LCM message data
+    #     '''
+    #     msg = position_t.decode(data)
+    #     prev_pose = self.agents.get(msg.node_id)
+    #     self.agents[msg.node_id] = msg
+
+    #     # Check if this is a new position for a NotIt agent
+    #     if prev_pose is None and msg.is_it == 0:
+    #         print(f"GameNode: NotIt agent {msg.node_id} connected at {msg.x}, {msg.y}")
+
+    #     if prev_pose is None and msg.is_it == 1:
+    #         print(f"GameNode: It agent connected at {msg.x}, {msg.y}")
+
+    #     # Check for collision between It and NotIt agents
+    #     if msg.is_it == 1:
+    #         # It agent moved, check for collisions with NotIt agents
+    #         for node_id, agent in self.agents.items():
+    #             if (agent.is_it == 0 and node_id not in self.frozen_agents and
+    #                 agent.x == msg.x and agent.y == msg.y):
+
+    #                 # Freeze the NotIt agent
+    #                 freeze_msg = freeze_t()
+    #                 freeze_msg.node_id = node_id
+    #                 self.publish("FREEZE", freeze_msg)
+                    
+    #                 # Mark this agent as frozen
+    #                 self.frozen_agents.add(node_id)
+    #                 self.frozen_count += 1
+    #                 print(f"GameNode: It agent caught NotIt agent {node_id} at ({msg.x}, {msg.y})! ({self.frozen_count}/{self.num_not_it})")
+
     def handle_position(self, channel, data):
         '''
         Handle incoming position updates from agents
@@ -115,12 +151,15 @@ class GameNode(Node):
             print(f"GameNode: It agent connected at {msg.x}, {msg.y}")
 
         # Check for collision between It and NotIt agents
-        if msg.is_it == 1:
-            # It agent moved, check for collisions with NotIt agents
+        if msg.is_it == 1:  # This is an It position update
+            it_x, it_y = msg.x, msg.y
+            
+            # Check all NotIt nodes for collisions with the It node
             for node_id, agent in self.agents.items():
-                if (agent.is_it == 0 and node_id not in self.frozen_agents and
-                    agent.x == msg.x and agent.y == msg.y):
-
+                if (agent.is_it == 0 and  # It's a NotIt node
+                    node_id not in self.frozen_agents and  # Not already frozen
+                    agent.x == it_x and agent.y == it_y):  # Same position
+                    
                     # Freeze the NotIt agent
                     freeze_msg = freeze_t()
                     freeze_msg.node_id = node_id
@@ -129,7 +168,30 @@ class GameNode(Node):
                     # Mark this agent as frozen
                     self.frozen_agents.add(node_id)
                     self.frozen_count += 1
-                    print(f"GameNode: It agent caught NotIt agent {node_id} at ({msg.x}, {msg.y})! ({self.frozen_count}/{self.num_not_it})")
+                    print(f"GameNode: It agent caught NotIt agent {node_id} at ({it_x}, {it_y})! ({self.frozen_count}/{self.num_not_it})")
+        
+        # Also check for collisions when receiving NotIt position updates
+        elif msg.is_it == 0:  # This is a NotIt position update
+            # Only check if this NotIt agent isn't already frozen
+            if msg.node_id not in self.frozen_agents:
+                # Find the It agent position
+                it_agent = None
+                for agent_id, agent in self.agents.items():
+                    if agent.is_it == 1:
+                        it_agent = agent
+                        break
+                
+                # If It agent exists and at same position as this NotIt
+                if it_agent and it_agent.x == msg.x and it_agent.y == msg.y:
+                    # Freeze the NotIt agent
+                    freeze_msg = freeze_t()
+                    freeze_msg.node_id = msg.node_id
+                    self.publish("FREEZE", freeze_msg)
+                    
+                    # Mark this agent as frozen
+                    self.frozen_agents.add(msg.node_id)
+                    self.frozen_count += 1
+                    print(f"GameNode: It agent caught NotIt agent {msg.node_id} at ({msg.x}, {msg.y})! ({self.frozen_count}/{self.num_not_it})")
 
 
     def handle_sync_request(self, channel, data):

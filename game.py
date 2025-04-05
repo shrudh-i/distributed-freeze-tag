@@ -20,11 +20,35 @@ def parse_arguments():
                         help='Positions for all agents: [not_it_1_x not_it_1_y ... not_it_n_x not_it_n_y it_x it_y]')
     
     args = parser.parse_args()
+
+    # Validate board dimensions
+    if args.width <= 0 or args.height <= 0:
+        parser.error(f"Board dimensions must be positive integers (got width={args.width}, height={args.height})")
+    
+    # Validate number of NotIt agents
+    if args.num_not_it <= 0:
+        parser.error(f"Number of NotIt agents must be positive (got {args.num_not_it})")
     
     # Validate number of positions matches the number of agents
     expected_positions = 2 * (args.num_not_it + 1)  # NotIt agents + It agent, each with x and y
     if len(args.positions) != expected_positions:
         parser.error(f"Expected {expected_positions} position values but got {len(args.positions)}")
+
+    # Validate all positions are within board boundaries
+    for i in range(args.num_not_it + 1):  # Check all agents (NotIt + It)
+        if i < args.num_not_it:
+            # NotIt agent positions
+            x, y = args.positions[2*i], args.positions[2*i + 1]
+            agent_type = f"NotIt agent {i+1}"
+        else:
+            # It agent position (last pair in the positions list)
+            x, y = args.positions[-2], args.positions[-1]
+            agent_type = "It agent"
+        
+        if x < 0 or x >= args.width:
+            parser.error(f"{agent_type} x-coordinate ({x}) is outside board boundaries [0, {args.width-1}]")
+        if y < 0 or y >= args.height:
+            parser.error(f"{agent_type} y-coordinate ({y}) is outside board boundaries [0, {args.height-1}]")
     
     return args
 
