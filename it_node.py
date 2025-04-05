@@ -40,7 +40,7 @@ class ItNode(Node):
 
         # Send sync request to the GameNode
         sync_request = sync_request_t()
-        sync_request.node_type = 0 # 1 for ItNode
+        sync_request.node_type = 1 # 1 for ItNode
         sync_request.node_id = self.node_id
         self.publish("SYNC_REQUEST", sync_request)
 
