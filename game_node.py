@@ -1,9 +1,8 @@
 # game_node.py
 import time
 import threading
-import lcm
+# import lcm
 import pygame
-import sys
 from node import Node
 
 # Import the messages.lcm
@@ -11,7 +10,7 @@ from messages import position_t, freeze_t, sync_request_t, sync_confirm_t, game_
 
 class GameNode(Node):
 
-    def _init__(self, width, height, num_not_it):
+    def __init__(self, width, height, num_not_it):
         '''
         Initialize the GameNode with board dimensions and NotIt agents
 
@@ -46,7 +45,7 @@ class GameNode(Node):
         Initialize LCM subscriptions and start the GUI thread
         '''
         # Subscribe to position updates, sync requests, and game status
-        self.subscribe("PLAYER_POSITION", self.handle_position)
+        self.subscribe("POSITION", self.handle_position)
         self.subscribe("SYNC_REQUEST", self.handle_sync_request)
 
         # Initialize and start the GUI thread
@@ -146,12 +145,12 @@ class GameNode(Node):
         node_type = ["GameNode", "ItNode", "NotItNode"][msg.node_type]
 
         # Add this node to our set of nodes that are ready
-        self.sync_request.add(msg.node_type, msg.node_id)
+        self.sync_request.add((msg.node_type, msg.node_id))
         print(f"GameNode: Received sync request from {node_type} {msg.node_id}")
 
         # Check if all (expected) nodes are ready
         expected_count = 1 + self.num_not_it # 1 It node + num_not_it NotIt nodes
-        if len(self.sync_requests) >= expected_count:
+        if len(self.sync_request) >= expected_count:
             # ALl nodes are ready, send sync confirmation
             print("GameNode: All nodes are ready. Starting the game!")
             
