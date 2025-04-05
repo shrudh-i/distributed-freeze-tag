@@ -79,48 +79,6 @@ class ItNode(Node):
         # self.running = False
         print("ItNode: Stopped")
 
-    # def chase_closest_not_it(self):
-    #     '''
-    #     Chase the closest unfrozen NotIt agent
-    #     '''
-    #     closest_node_id = None
-    #     closest_distance = float('inf')
-
-    #     # Find the closest unfrozen NotIt node
-    #     for node_id, (x, y) in self.not_it_nodes.items():
-    #         if node_id not in self.frozen_nodes:
-    #             # Calculate Manhattan distance
-    #             distance = abs(self.x - x) + abs(self.y - y)
-    #             if distance < closest_distance:
-    #                 closest_distance = distance
-    #                 closest_node_id = node_id
-
-    #     # If no unfrozen nodes or all nodes are frozen, do nothing
-    #     if closest_node_id is None:
-    #         return
-        
-    #     # Get position of closest NotIt
-    #     target_x, target_y = self.not_it_nodes[closest_node_id]
-        
-    #     # Determine best move direction (prioritize larger axis difference)
-    #     dx = target_x - self.x
-    #     dy = target_y - self.y
-        
-    #     if abs(dx) >= abs(dy):
-    #         # Move horizontally first
-    #         if dx > 0:
-    #             self.x = min(self.x + 1, self.width - 1)
-    #         elif dx < 0:
-    #             self.x = max(self.x - 1, 0)
-    #     else:
-    #         # Move vertically first
-    #         if dy > 0:
-    #             self.y = min(self.y + 1, self.height - 1)
-    #         elif dy < 0:
-    #             self.y = max(self.y - 1, 0)
-                
-    #     print(f"ItNode: Moved to ({self.x}, {self.y}), chasing NotIt node {closest_node_id}")
-
     def chase_closest_not_it(self):
         '''
         Chase the closest unfrozen NotIt agent with prediction

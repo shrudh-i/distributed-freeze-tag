@@ -1,7 +1,6 @@
 # game.py
 import multiprocessing
 import argparse
-import signal
 import time
 import lcm
 import sys 

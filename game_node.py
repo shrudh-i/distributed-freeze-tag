@@ -71,7 +71,7 @@ class GameNode(Node):
                 self.publish("GAMEOVER", game_over_msg)
                 print("GameNode: Game Over! All NotIt agents are frozen.")
 
-            # Wait for a s econd for other nodes to process the game over message
+            # Wait for a second for other nodes to process the game over message
             time.sleep(1)
         
         except KeyboardInterrupt:
