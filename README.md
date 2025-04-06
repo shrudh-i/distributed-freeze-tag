@@ -90,3 +90,7 @@ python game.py --width 20 --height 15 --num-not-it 2 3 5 10 12 0 0
 - `sync_request_t`: Used to synchronize before the game starts
 - `sync_confirm_t`: Confirms that all nodes are ready to start
 - `game_init_t`: Passes game parameters to all nodes
+
+## Technical Documentation
+
+For detailed implementation information about the algorithms, communication architecture, and node behaviors, please see the [technical deep dive](technical-deep-dive.md).
