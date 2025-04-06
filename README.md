@@ -16,10 +16,12 @@ This project implements a distributed real-time Freeze Tag game using multiple a
 
 ### Prerequisites
 - Docker installed on your system
+   - You can install it through: `sudo apt install docker.io`
+   - Note: Ensure you do a `pip install --upgrade pip` once installed
 
 ### Building the Docker Image
 ```bash
-docker build -t freeze-tag .
+sudo docker build -t freeze-tag .
 ```
 
 ### Running the Game
