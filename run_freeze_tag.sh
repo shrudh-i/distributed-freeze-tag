@@ -67,7 +67,7 @@ echo "NUM_NOT_IT: $NUM_NOT_IT"
 echo "POSITIONS: ${POSITIONS[@]}"
 
 # Then run with access to your display
-docker run -it --rm \
+sudo docker run -it --rm \
   -e DISPLAY=$DISPLAY \
   -v /tmp/.X11-unix:/tmp/.X11-unix \
   freeze-tag --width $WIDTH --height $HEIGHT --num-not-it $NUM_NOT_IT --positions ${POSITIONS[@]}
