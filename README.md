@@ -1,38 +1,92 @@
-# distributed-freeze-tag
+# Distributed Freeze Tag Game
 
-## Dependencies within the Docker container:
-### 1. LCM installation:
-``` 
+This project implements a distributed real-time Freeze Tag game using multiple agents that communicate over a network using LCM (Lightweight Communications and Marshalling).
+
+## Game Rules
+- One agent is designated as "It" and the rest are "NotIt" agents
+- The "It" agent's goal is to chase and freeze all "NotIt" agents
+- The game continues until all "NotIt" agents have been frozen
+
+## Dependencies
+- Python 3.9+
+- LCM (Lightweight Communications and Marshalling)
+- PyGame for visualization
+
+## Running with Docker
+
+### Prerequisites
+- Docker installed on your system
+
+### Building the Docker Image
+```bash
+docker build -t freeze-tag .
+```
+
+### Running the Game
+There is an executable bash script `run_freeze_tag.sh` designed to take in parameters to start the game in the Docker container!
+```bash
+./run_freeze_tag.sh --width 20 --height 15 --num-not-it 2 --positions 3 5 10 12 0 0
+```
+
+**Parameters:**
+- `--width`: Width of the game board
+- `--height`: Height of the game board
+- `--num-not-it`: Number of "NotIt" agents
+- `--positions`: Positions of all agents (format: x1 y1 x2 y2 ... x_it y_it)
+
+**Note:<br>**
+If no parameters are passed in, it defaults to the example command given in the challenge.
+- Creates a 20x15 board
+- Sets up 2 "NotIt" agents at positions (3,5) and (10,12)
+- Places the "It" agent at position (0,0)
+
+## Running without Docker
+
+### Installation
+1. Install LCM:
+```bash
 sudo apt install liblcm-dev
 ```
 
-## Approach:
-
-To solve this challenge, I took the following approach:
-### 1. Completing the messages.lcm
-* From analysing the requirements of the game, I wanted to first expand the messages.lcm file with additional message types for the game's communication
-* Essentially, this establishes the communication protocols before we begin deving game.py 
-* After finishing the messages.lcm file, I ran:
-```
+2. Generate LCM Python bindings:
+```bash
 lcm-gen -p messages.lcm
+```  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ensure you're in the directory where `messages.lcm` is in before running this. This will generate the source code required to establish communication when the game is running.
+
+3. Install Python dependencies:
+```bash
+pip install pygame lcm
 ```
 
-Which created a messaged directory, containing all the messages we have designed so far.
+### Running the Game
+```bash
+python game.py --width 20 --height 15 --num-not-it 2 3 5 10 12 0 0
+```
 
-### 2. Structuring version-1 of `game.py`
-* After defining all the message types, it made sense to structure out what I would like each node to take in and how those processes would look like
-* In `game.py`, I implemented functionalities to parse the arguments (defined in the question), and start different processes for each node
-* I defined the game's termination condition - essentially, when the GameNode stops - and included functionalities to kill all processes when the game is over
+## Implementation Details
 
-### 3. Defining the Nodes: GameNode, NotItNode, ItNode:
-#### 3.1. GameNode implemetation
-* 
+### Components
+1. **GameNode**
+   - Manages the game state
+   - Tracks positions of all agents
+   - Detects collisions and sends freeze messages
+   - Visualizes the game using PyGame
 
+2. **ItNode**
+   - Chases "NotIt" agents using a simple heuristic
+   - Listens for position updates from all agents
+   - Strategically moves to catch "NotIt" agents
 
-## Message types I've created for the game:
-* `gameover_t`: Signals the end of the game
-* `position_t`: Used by both It and NotIt nodes to publish their positions
-* `freeze_t`: Send to the NotIt node when its caught
-* `sync_request_t`: Used to sync before the game starts
-* `sync_confirm_t`: Confirms that all nodes are ready to start
-* `game_init_t`: Passes game params to all nodes
+3. **NotItNode**
+   - Moves randomly within board boundaries
+   - Stops moving when frozen
+   - Publishes position updates
+
+### Message Types
+- `gameover_t`: Signals the end of the game
+- `position_t`: Used by both It and NotIt nodes to publish their positions
+- `freeze_t`: Sent to the NotIt node when it's caught
+- `sync_request_t`: Used to synchronize before the game starts
+- `sync_confirm_t`: Confirms that all nodes are ready to start
+- `game_init_t`: Passes game parameters to all nodes
